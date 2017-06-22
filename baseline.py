@@ -74,6 +74,19 @@ def prefixes(nltkTokens,tokenizerTokens): #Function returns tuple containing num
             tokenizerCount+=1
     return (nltkCount,tokenizerCount)
 
+def words(nltkTokens,tokenizerTokens): #Function returns tuple containing number of words tokenized by tokenizer
+    tokenizerTokensList = [j for i in tokenizerTokens for j in i]
+    nltkCount = 0
+    tokenizerCount = 0
+    regexp = re.compile(r"\b(?<!\W)\w+(?!\W)\b")
+    for i in nltkTokens:
+        if regexp.match(i):
+            nltkCount+=1
+    for i in tokenizerTokensList:
+        if regexp.match(i):
+            tokenizerCount+=1
+    return (nltkCount,tokenizerCount)
+
 
 print ("Size of Brown corpus in bytes:  ",file_size("brown.txt"))
 text = open("brown.txt","r").read() #Read the Brown corpus
@@ -109,3 +122,6 @@ print ("NLTK tokenized",numberOfContractions[0],"contractions and tokenizer toke
 
 numberOfPrefixes = prefixes(nltkTokens,tokenizerTokens)
 print ("NLTK tokenized",numberOfPrefixes[0],"prefixes/abbreviations and tokenizer tokenized",numberOfPrefixes[1],"prefixes/abbreviations")
+
+numberOfWords = words(nltkTokens,tokenizerTokens)
+print ("NLTK tokenized",numberOfWords[0],"words and tokenizer tokenized",numberOfWords[1],"words")
