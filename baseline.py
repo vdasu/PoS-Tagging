@@ -22,6 +22,10 @@ def num_tokens(nltkTokens,tokenizerTokens): #Function returns a tuple which incl
     else:
         return ("NLTK",abs(nltk_num-tokenizer_num),"tokenizer")
 
+def unique_tokens(nltkTokens,tokenizerTokens): #Function returns number of unique tokens to each implementation
+    tokenizer_tokens = [j for i in tokenizerTokens for j in i]
+    return (len(set(tokenizer_tokens)-set(nltkTokens)),len(set(nltkTokens)-set(tokenizer_tokens)))
+
 def special_char(nltkTokens,tokenizerTokens): #Function returns tuple containing number of special characters tokenized by each tokenizer
     tokenizerTokensList = [j for i in tokenizerTokens for j in i]
     nltkCount = 0
@@ -109,6 +113,9 @@ print (functionSpeed[0],"is faster than",functionSpeed[1],"by",functionSpeed[2],
 
 numberOfTokens = num_tokens(nltkTokens,tokenizerTokens)
 print (numberOfTokens[0],"generated",numberOfTokens[1],"more tokens than",numberOfTokens[2])
+
+uniqueTokens = unique_tokens(nltkTokens,tokenizerTokens)
+print (uniqueTokens[0],"tokens are unique to tokenizer and",uniqueTokens[1],"tokens are unique to NLTK")
 
 numberOfSpecialChars = special_char(nltkTokens,tokenizerTokens)
 print ("NLTK tokenized",numberOfSpecialChars[0],"special charcters and tokenizer tokenized",numberOfSpecialChars[1],"special characters")
