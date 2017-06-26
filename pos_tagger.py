@@ -18,14 +18,8 @@ class viterbi:
                 m = re.search('_(.*)',word)
                 self.tags.append(m.group(1))
         self.tags = set(self.tags)
-    def display(self):
-        for i in self.tags:
-            print (i)
             
-
-
 pos_tag = viterbi()
 text = open("brown.txt","r").read()
 pos_tag.tokenize(text)
 pos_tag.initialise_tags()
-pos_tag.display()
