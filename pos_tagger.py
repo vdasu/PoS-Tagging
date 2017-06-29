@@ -52,15 +52,16 @@ class pos_tagger:
     def hmm_test(self):
         sent = "START START The grand jury commented. STOP"
         tag_sequence = "START START AT JJ NN VBD . STOP"
-        prob = self.cpddist_tags[("START","START")].prob("AT")*\
-                self.cpddist_tags[("START","AT")].prob("JJ")*self.cpddist_tags[("AT","JJ")].prob("NN")*\
-                self.cpddist_tags[("JJ","NN")].prob("VBD")*self.cpddist_tags[("NN","VBD")].prob(".")*\
-                self.cpddist_tags[("VBD",".")].prob("STOP")*self.cpddist_tagswords["START"].prob("START")*\
-                self.cpddist_tagswords["START"].prob("START")*self.cpddist_tagswords["AT"].prob("The")*\
-                self.cpddist_tagswords["JJ"].prob("grand")*self.cpddist_tagswords["NN"].prob("jury")*\
-                self.cpddist_tagswords["VBD"].prob("commented")*self.cpddist_tagswords["."].prob(".")*\
-                self.cpddist_tagswords["STOP"].prob("STOP")
-        print ('The probability of "START START The grand jury commented. STOP" having tags "START START AT JJ NN VBD . STOP" is: ',prob)
+        prob_tags = 1.0
+        prob_tagswords = 1.0
+        words_tokens = [j for i in word_tokenize(sent) for j in i]
+        tags_tokens = [j for i in word_tokenize(tag_sequence) for j in i]
+        for i in range(2,len(tags_tokens)):
+            prob_tags*=self.cpddist_tags[(tags_tokens[i-2],tags_tokens[i-1])].prob(tags_tokens[i])
+        for i,j in zip(words_tokens,tags_tokens):
+            prob_tagswords*=(self.cpddist_tagswords[j].prob(i))
+        prob_tot = prob_tags*prob_tagswords
+        print ('The probability of "START START The grand jury commented. STOP" having tags "START START AT JJ NN VBD . STOP" is: ',prob_tot)
 pos_tag = pos_tagger()
 pos_tag.tokenize()
 pos_tag.init_tags()
