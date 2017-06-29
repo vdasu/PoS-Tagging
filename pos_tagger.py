@@ -62,11 +62,13 @@ class pos_tagger:
             prob_tagswords*=(self.cpddist_tagswords[j].prob(i))
         prob_tot = prob_tags*prob_tagswords
         print ('The probability of "START START The grand jury commented. STOP" having tags "START START AT JJ NN VBD . STOP" is: ',prob_tot)
-pos_tag = pos_tagger()
-pos_tag.tokenize()
-pos_tag.init_tags()
-pos_tag.init_tokens_tags()
-pos_tag.init_cfd_tagswords()
-pos_tag.init_cpd_tagswords()
-pos_tag.hmm_trigram()
-pos_tag.hmm_test()
+
+if __name__=="__main__":
+    pos_tag = pos_tagger()
+    pos_tag.tokenize()
+    pos_tag.init_tags()
+    pos_tag.init_tokens_tags()
+    pos_tag.init_cfd_tagswords()
+    pos_tag.init_cpd_tagswords()
+    pos_tag.hmm_trigram()
+    pos_tag.hmm_test()
