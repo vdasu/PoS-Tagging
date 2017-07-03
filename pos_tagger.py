@@ -62,6 +62,35 @@ class pos_tagger:
             prob_tagswords*=(self.cpddist_tagswords[j].prob(i))
         prob_tot = prob_tags*prob_tagswords
         print ('The probability of "START START The grand jury commented. STOP" having tags "START START AT JJ NN VBD . STOP" is: ',prob_tot)
+    def bigram_hmm_test(self):
+        sent = "START The grand jury commented. STOP"
+        tag_sequence = "START AT JJ NN VBD . STOP"
+        tags_tokens = self.tags_tokens
+        for i in tags_tokens:
+            i.remove(('START','START'))
+        sents = open('brown_tagged.txt').read().splitlines()
+        tags = []
+        for sent in sents:
+            words = sent.split()
+            words.remove('START_START')
+            for word in words:
+                m = re.search('_(.*)',word)
+                tags.append(m.group(1)) 
+        cfddist_tagswords = CFD(j for i in tags_tokens for j in i)
+        bigrams = ngrams(tags,2)
+        cfddist_tags = CFD(bigrams)
+        cpddist_tagswords = CPD(cfddist_tagswords,MLEProbDist)
+        cpddist_tags = CPD(cfddist_tags,MLEProbDist)
+        prob_tags = 1.0
+        prob_tagswords = 1.0
+        words_tokens = [j for i in word_tokenize(sent) for j in i]
+        tags_tokens = [j for i in word_tokenize(tag_sequence) for j in i]
+        for i in range(1,len(tags_tokens)):
+            prob_tags*=cpddist_tags[tags_tokens[i-1]].prob(tags_tokens[i])
+        for i,j in zip(words_tokens,tags_tokens):
+            prob_tagswords*=cpddist_tagswords[j].prob(i)
+        prob_tot=prob_tags*prob_tagswords
+        print ("Bigram probability: ",prob_tot)
 
 if __name__=="__main__":
     pos_tag = pos_tagger()
@@ -72,3 +101,4 @@ if __name__=="__main__":
     pos_tag.init_cpd_tagswords()
     pos_tag.hmm_trigram()
     pos_tag.hmm_test()
+    pos_tag.bigram_hmm_test()
