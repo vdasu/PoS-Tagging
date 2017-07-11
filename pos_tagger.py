@@ -27,7 +27,7 @@ class pos_tagger:
             sent.append('STOP') #Append STOP token to end of list
     
     def init_tags(self): #Function to initialise tags
-        sents = open("brown_tagged.txt").read().splitlines()
+        sents = open("brown_trigram.txt").read().splitlines()
         for sent in sents:
             words = sent.split()
             for word in words:
@@ -36,7 +36,7 @@ class pos_tagger:
         self.tags_set = set(self.tags) #List of all unique tags in corpus
     
     def init_words_tags(self): #Function to initialise word-tag pairs
-        tagged_sents = open("brown_tagged.txt").read().splitlines()
+        tagged_sents = open("brown_trigram.txt").read().splitlines()
         words_tags = []
         for tagged_sent in tagged_sents:
             tagged_words = tagged_sent.split()
