@@ -2,4 +2,5 @@ brown.txt
 brown_tagged.txt
 brown_bigram.txt
 brown_trigram.txt
+input.txt
 __pycache__/
