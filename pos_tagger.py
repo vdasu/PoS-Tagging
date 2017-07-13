@@ -32,6 +32,10 @@ class pos_tagger:
             words = sent.split()
             for word in words:
                 m = re.search('_(.*)',word)
+                # if m.group(1) in ('START','STOP'):
+                #     self.tags.append(m.group(1))
+                # else:
+                #     self.tags.append(m.group(1)[:2])
                 self.tags.append(m.group(1))
         self.tags_set = set(self.tags) #List of all unique tags in corpus
     
@@ -42,6 +46,10 @@ class pos_tagger:
             tagged_words = tagged_sent.split()
             for tagged_word in tagged_words:
                 m = re.search('(.*)_(.*)',tagged_word)
+                # if m.group(2) in ('START','STOP'):
+                #     words_tags.append((m.group(1),m.group(2)))
+                # else:
+                #     words_tags.append((m.group(1),m.group(2)[:2]))
                 words_tags.append((m.group(1),m.group(2)))
             self.words_tags.append(words_tags)
             words_tags = []
@@ -73,7 +81,7 @@ class pos_tagger:
     def test(self): #Test function
 
         sent = "START START The grand jury commented. STOP"
-        tag = "START START AT JJ NN VBD . STOP"
+        tag = "START START AT JJ NN VBD  . STOP" 
         prob_tag = 1.0
         prob_words = 1.0
         tot_prob = 1.0
@@ -89,55 +97,58 @@ class pos_tagger:
         print (self.viterbi())
 
     def viterbi(self):
-        sent = "The grand jury commented." #Input sentence
-        tokens=[j for i in word_tokenize(sent) for j in i] #Tokens of input sentence
-        n = len(tokens) #Length of input sentence
-        phi = [defaultdict(float) for i in range(n+1)] #List of dictionaries to store max probability of preceding tag sequence at a given postion
-        back_ptr = [defaultdict(str) for i in range(n+1)] #List of dictionaries to store backpointers (tags) that maximises phi
-        phi[0][('START','START')] = 1.0 #Initialise phi for START tags
         
-        #Iterate through all tokens all store max probabilities and arguments
-        for k in range(1,n+1): 
-            x=tokens[k-1] 
+        sent = 'However, the jury said it believes "these two offices should be combined to achieve greater efficiency and reduce the cost of administration".'
+        tokens = [j for i in word_tokenize(sent) for j in i] #Tokens of input sentence
+        n = len(tokens) #Length of input sentence
+        psi = [defaultdict(float) for i in range(n+1)] #List of dictionaries to store max probability of preceding tag sequence at a given postion
+        back_ptr = [defaultdict(str) for i in range(n+1)] #List of dictionaries to store backpointers (tags) that maximises phi
+        psi[0][('START','START')] = 1.0 #Base case
+        #Iterate through all tokens all store max probabilities and max arguments
+        for k in range(1,n+1):
+            x = tokens[k-1]
             #Sample space 'S' for each tag w,u,v  
-            U=self.tags_set
-            V=self.tags_set
-            W=self.tags_set
+            W = self.tags_set
+            U = self.tags_set
+            V = self.tags_set
             if k==1: #Both preceding tags for first word are START in a trigram model
-                W=('START')
-                U=('START')
-            if k==2: #One of the prceding tags for second word is START in a trigram model
-                W=('START')
+                W = ('START')
+                U = ('START')
+            if k==2: #One of the preceding tags for second word is START in a trigram model
+                W = ('START')
             for u in U:
                 for v in V:
                     max_prob = 0.0 #Stores maximum probability for each word
-                    max_arg = '' #Stores tag that maximises probability 
+                    max_arg = "" #Stores tag that maximises probability 
                     for w in W:
-                        temp_prob=phi[k-1][(w,u)]*self.tags_prob[(w,u,v)]*self.words_tags_prob[(x,v)] #Calculate probability for tag sequence at position k
-                        if temp_prob>max_prob: #Store maximum probability and tag 
-                            max_prob=temp_prob
-                            max_arg=w
-                    phi[k][(u,v)]=max_prob #Store maximum probability for positon k and tags u,v
-                    back_ptr[k][(u,v)]=max_arg #Store tag that maximises probability (backpointer)
+                        temp_prob = psi[k-1][(w,u)]*self.tags_prob[(w,u,v)]*self.words_tags_prob[(x,v)] #Calculate probability for tag sequence at position k
+                        if temp_prob>max_prob:
+                            if temp_prob!=0.0:
+                                max_prob = temp_prob
+                                max_arg = w 
+                    psi[k][(u,v)] = max_prob #Store maximum probability for positon k and tags u,v
+                    back_ptr[k][(u,v)] = max_arg #Store tag that maximises probability (backpointer)
 
-        #Back Track to determine tag sequence
-        max_prob = 0.0
-        max_u = ''
-        max_v = ''
-        for u in self.tags: 
-            for v in self.tags:
-                temp_prob = phi[n][(u,v)]*self.tags_prob[(u,v,'STOP')]
-                if prob>max_pi:
-                    max_pi=temp_prob
-                    max_u=u
-                    max_v=v
+            #Back Track to determine tag sequence
+            max_prob = 0.0
+            max_u = ""
+            max_v = ""
+            for u in self.tags_set:
+                for v in self.tags_set:
+                    temp_prob = psi[n][(u,v)]*self.tags_prob[(u,v,'STOP')]
+                    if temp_prob>max_prob:
+                        if temp_prob!=0.0:
+                            max_prob = temp_prob
+                            max_u = u
+                            max_v = v
+            t = [None]*(n+1) #Initialise tag sequence
+            t[n] = max_v
+            t[n-1] = max_u
+            for k in range(n-2,0,-1):
+                t[k] = back_ptr[k+2][(t[k+1],t[k+2])]
+            return t
 
-        t = [None]*(n+1) #Initialise tag sequence
-        t[n-1] = max_u
-        t[n] = max_v
-        for k in range(n-2,0,-1):
-            t[k]=back_ptr[k+2][(t[k+1],t[k+2])]
-        return t
+
    
 if __name__=="__main__":
     pos_tag = pos_tagger()
