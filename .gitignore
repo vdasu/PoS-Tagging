@@ -3,4 +3,5 @@ brown_tagged.txt
 brown_bigram.txt
 brown_trigram.txt
 input.txt
+input_tagged.txt
 __pycache__/
